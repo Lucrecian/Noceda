@@ -2,51 +2,22 @@ function saludar () {
     console.log("¡Hola, bienvenido a nuestro Centro de Estética!")
 }
 
-saludar ()
+const contenedor = document.getElementById("contenedor");
 
-/*
-function passwordValidation (pasword, repeatPassword) {
-    if (pasword != "" || repeatPassword == "") {
-        console.log ("La contraseña debe contener caracteres");
-    }
-    if (pasword !== repeatPassword) {
-        console.log ("La contraseña ingresada no es igual");
-    }
-    if (pasword.length < 8) {
-        console.log ("La contraseña debe tener al menos 8 caracteres");
-    }
-    if (pasword.length > 15) {
-        console.log ("La contraseña no puede contener mas de 15 caracteres")
-    }
-}
-passwordValidation ("lu", "casa"); */
+function servicios(){
+    contenedor.innerHTML = "Estos son los servicios";
+};
 
-let nombreUsuario = prompt ("Ingrese nombre del paciente");
-if (nombreUsuario == "") {
-    alert ("No ha ingresado el nombre");
-}
-else {
-    alert ("Nombre de usuario ingresado correctamente " + nombreUsuario);
-}
-
-/* let numeroPacientes = parseInt(prompt("Seleccione su turno según su orden de llegada, gracias."));
-for (let turno = 1; turno <= numeroPacientes; turno ++) {
-    let apellido = prompt("Apellido del paciente " + turno + "?");
-    alert("El paciente " + apellido + ", tiene aisgnado su turno, número " + turno);
-    console.log("El paciente" + apellido + ", tiene asignado el turno número " + turno);
-}*/
+const buttonServicios = document.getElementById("servicios");
+console.log(buttonServicios);
+buttonServicios.addEventListener("click", servicios)
 
 class Servicio {
     constructor(id, nombre, precio) {
-        this.id = id;
-        this.nombre = nombre.toUpperCase();
-        this.precio = parseFloat(precio);
-    }
-
-    toString = function () {
-        return this.nombre + "( $" + this.precio.toFixed(2) + ")";
-    };
-}
+    this.id = id;
+    this.nombre = nombre;
+    this.precio = precio;   
+}}
 
 let misServicios = [
     new Servicio(1, "Limpieza facial profunda", 4800),
@@ -56,57 +27,88 @@ let misServicios = [
     new Servicio(5, "Mesoterapia", 9000),
     new Servicio(6, "Luz pulsada intensa", 12000),
     new Servicio(7, "Plasma rico en plaquetas", 10000),
-    new Servicio(8, "Sesión Skin", 2500), 
+    new Servicio(8, "Sesión Skin", 2500)
 ];
 
- /* uso del forEach */
-
-misServicios.forEach((unServicio ) => {
-    console.log("--> " + unServicio.toString());
-});
-
-
-/*arrays y objeto combinados*/
-
-class Tratamientos {
-    constructor(tratamiento, precio) {
-        this.tratamiento = tratamiento.toUpperCase ();
-        this.precio = parseFloat (precio);
-        this.agendado = false;
+function servicios() {
+    let listaHTML = '<ul>';
+    for (let servicio of misServicios) {
+    listaHTML += `<li><input type="checkbox" onchange="actualizarCarrito(${servicio.id}, this.checked)"> ${servicio.nombre} - Precio: $${servicio.precio}</li>`;
     }
+    listaHTML += '</ul>';
+    contenedor.innerHTML = listaHTML;
+    contenedor.innerHTML += 'Total: $<span id="total">0</span>';
+    const buttonGuardar = document.getElementById("buttonGuardar");
+    if (!buttonGuardar) {
+    const buttonElement = document.createElement("button");
+    buttonElement.id = "buttonGuardar";
+    buttonElement.textContent = "Guardar";
+    buttonElement.addEventListener("click", guardarCarrito);
+    buttonElement.classList.add("button-guardar");
+    contenedor.appendChild(buttonElement);
+}
 }
 
-let misTratamientos = [];
+let carrito = [];
+let total = 0;
 
-let respuesta = "SI";
+function actualizarCarrito(servicioId, isChecked) {
+const servicio = misServicios.find(servicio => servicio.id === servicioId);
 
-do {
-    let tratamiento = prompt("Ingrese el nombre del tratamiento que desea realizar");
-    let precio = prompt("Ingrese el precio del tratamiento elegido");
-    const unTratamiento = new Tratamientos(tratamiento,precio);
-    misTratamientos.push(unTratamiento);
-    console.log("Tratamietos seleccionados" ,misTratamientos.length);
-    respuesta = prompt("¿Quieres seleccionar otro tratamiento? SI/NO");
-} while (respuesta.toUpperCase() !== "NO")
-
-console.log("Aquí estan tus tratamientos seleccionados", misTratamientos);
-
-let suma = 0;
-
-for (const unTratamiento of misTratamientos) {
-    console.log("Los tratamientos seleccionados son" ,unTratamiento);
-    suma = suma + unTratamiento.precio;
+if (isChecked) {
+    carrito.push(servicio);
+    total += servicio.precio;
+} else {
+    carrito = carrito.filter(item => item.id !== servicioId);
+    total -= servicio.precio;
 }
 
-console.log("Aquí puede observar el monto total de los tratamientos seleccionados: " ,suma);
+actualizarTotal();
+}
 
-/* funciones de orden superior 2 */
+function actualizarTotal() {
+const totalElement = document.getElementById("total");
+totalElement.textContent = total;
+}
 
-let fechaNuevostratamientos = new Date(2023, 4, 29);
-let hoy = new Date();
+function guardarCarrito() {
+    console.log("Carrito guardado:", carrito);
+    const telefono = '2954290990'; 
+    const mensaje = `¡Hola! Quiero realizar una compra de tratamientos por un total de $${total}.`;
+    const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+    window.location.href = url;
+    localStorage.setItem('tratamientosSeleccionados', JSON.stringify(carrito));
+}
 
-const diferencia = fechaNuevostratamientos - hoy;
+const datosForm = document.getElementById('datosForm');
+const nombreInput = document.getElementById('nombre');
+const dniInput = document.getElementById('dni');
 
-const milisegundosPorDia = 86400000;
+if (localStorage.getItem('datosUsuario')) {
+    ocultarFormulario();
+    const datosGuardados = JSON.parse(localStorage.getItem('datosUsuario'));
+    const nombre = datosGuardados.nombre;
+    const dni = datosGuardados.dni;
+    console.log('Nombre:', nombre);
+    console.log('DNI:', dni);
+} else {
+    datosForm.addEventListener('submit', guardarDatos);
+}
 
-console.log("--> ¡Cuenta regresiva para la incorporación de nuevos tratamientos! solo faltan: " + Math.round ((diferencia/milisegundosPorDia)));
+function guardarDatos(event) {
+    event.preventDefault(); 
+    const nombre = nombreInput.value;
+    const dni = dniInput.value;
+    const datosUsuario = { nombre, dni };
+    localStorage.setItem('datosUsuario', JSON.stringify(datosUsuario));
+    console.log('Nombre:', nombre);
+    console.log('DNI:', dni);
+    ocultarFormulario();
+}
+
+function ocultarFormulario() {
+    setTimeout(() => {
+    const formulario = document.getElementById('formulario');
+    formulario.style.display = 'none';
+    }, 5000); 
+}
