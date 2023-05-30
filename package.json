@@ -1,0 +1,16 @@
+{
+  "name": "proyecto-final-centrodeestetica",
+  "version": "1.0.0",
+  "description": "ultima clase nodojs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "class",
+    "javascript",
+    "coderhouse"
+  ],
+  "author": "lucrecia",
+  "license": "ISC"
+}
