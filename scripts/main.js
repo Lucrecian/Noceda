@@ -48,6 +48,22 @@ function servicios() {
         buttonElement.classList.add("button-guardar");
         contenedor.appendChild(buttonElement);
     }
+    const buttonVaciar = document.getElementById("buttonVaciar");
+    if (!buttonVaciar) {
+        const buttonVaciarElement = document.createElement("button");
+        buttonVaciarElement.id = "buttonVaciar";
+        buttonVaciarElement.textContent = "Vaciar Carrito";
+        buttonVaciarElement.addEventListener("click", vaciarCarrito);
+        buttonVaciarElement.classList.add("button-vaciar");
+        contenedor.appendChild(buttonVaciarElement);
+    }
+}
+
+function vaciarCarrito() {
+    carrito = [];
+    total = 0;
+    actualizarTotal();
+    mostrarResumen();
 }
 
 let carrito = [];
@@ -84,58 +100,22 @@ function mostrarResumen() {
     contenedor.innerHTML = resumenHTML;
 }
 
+
+
 function guardarCarrito() {
     mostrarResumen();
     console.log("Carrito guardado:", carrito);
-    Swal.fire({
-        title: 'Confirmar',
-        text: '¿Estás seguro de guardar los tratamientos?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Guardar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const telefono = '2954290990';
-            const mensaje = `¡Hola! Quiero realizar una compra de tratamientos por un total de $${total}.`;
-            const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
-            window.location.href = url;
-            localStorage.setItem('tratamientosSeleccionados', JSON.stringify(carrito));
-        }
-    });
-    
-    setTimeout(() => {
+
+    if (confirm("¿Estás seguro de guardar los tratamientos?")) {
         const telefono = '2954290990';
-        const mensaje = `¡Hola! Quiero realizar una compra de tratamientos por un total de $${total}.`;
+
+        // Obtener el total del carrito
+        const totalCarrito = total;
+
+        const mensaje = `¡Hola! Quiero realizar una compra de tratamientos por un total de $${totalCarrito}.`;
         const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
         window.location.href = url;
-    }, 5000);
-}
-
-const datosForm = document.getElementById('datosForm');
-const nombreInput = document.getElementById('nombre');
-const dniInput = document.getElementById('dni');
-
-if (localStorage.getItem('datosUsuario')) {
-    ocultarFormulario();
-    const datosGuardados = JSON.parse(localStorage.getItem('datosUsuario'));
-    const nombre = datosGuardados.nombre;
-    const dni = datosGuardados.dni;
-    console.log('Nombre:', nombre);
-    console.log('DNI:', dni);
-} else {
-    datosForm.addEventListener('submit', guardarDatos);
-}
-
-function guardarDatos(event) {
-    event.preventDefault();
-    const nombre = nombreInput.value;
-    const dni = dniInput.value;
-    const datosUsuario = { nombre, dni };
-    localStorage.setItem('datosUsuario', JSON.stringify(datosUsuario));
-    console.log('Nombre:', nombre);
-    console.log('DNI:', dni);
-    ocultarFormulario();
+    }
 }
 
 
