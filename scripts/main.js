@@ -106,23 +106,41 @@ function guardarCarrito() {
     mostrarResumen();
     console.log("Carrito guardado:", carrito);
 
-    if (confirm("¿Estás seguro de guardar los tratamientos?")) {
+    const guardarTratamientos = new Promise((resolve, reject) => {
+        Swal.fire({
+            title: '¿Estás seguro de guardar los tratamientos?',
+            text: "Se abrirá WhatsApp para confirmar la compra.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Guardar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                resolve();
+            } else {
+                reject(new Error('La operación fue cancelada'));
+            }
+        });
+    });
+
+    guardarTratamientos.then(() => {
         const telefono = '2954290990';
-
-        // Obtener el total del carrito
         const totalCarrito = total;
-
         const mensaje = `¡Hola! Quiero realizar una compra de tratamientos por un total de $${totalCarrito}.`;
         const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
         window.location.href = url;
-    }
+    }).catch((error) => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message
+        });
+    });
 }
 
 
-
-
 document.getElementById('contactForm').addEventListener('submit', function (e) {
-    e.preventDefault(); 
+    e.preventDefault();
 
     const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
@@ -149,11 +167,12 @@ document.getElementById('contactForm').addEventListener('submit', function (e) {
         })
         .then(data => {
             console.log('Respuesta del servidor:', data);
-            alert('Mensaje enviado correctamente');
+            Swal.fire({
+                icon: 'success',
+                title: 'Mensaje enviado correctamente',
+                showConfirmButton: false,
+                timer: 1500
+            });
             document.getElementById('contactForm').reset(); 
         })
-        .catch(error => {
-            console.log('Error: ' + error.message);
-            alert('Error al enviar el mensaje. Inténtalo de nuevo más tarde.');
-        });
 });
