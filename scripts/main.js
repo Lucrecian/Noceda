@@ -1,7 +1,3 @@
-function saludar() {
-    console.log("¡Hola, bienvenido a nuestro Centro de Estética!")
-}
-
 const contenedor = document.getElementById("contenedor");
 
 function servicios() {
@@ -9,7 +5,6 @@ function servicios() {
 };
 
 const buttonServicios = document.getElementById("servicios");
-console.log(buttonServicios);
 buttonServicios.addEventListener("click", servicios)
 
 class Servicio {
@@ -64,6 +59,8 @@ function vaciarCarrito() {
     total = 0;
     actualizarTotal();
     mostrarResumen();
+    localStorage.removeItem('carrito');
+    localStorage.removeItem('total');
 }
 
 let carrito = [];
@@ -79,6 +76,8 @@ function actualizarCarrito(servicioId, isChecked) {
         carrito = carrito.filter(item => item.id !== servicioId);
         total -= servicio.precio;
     }
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+    localStorage.setItem('total', total.toString());
 
     actualizarTotal();
 }
@@ -104,75 +103,59 @@ function mostrarResumen() {
 
 function guardarCarrito() {
     mostrarResumen();
-    console.log("Carrito guardado:", carrito);
 
-    const guardarTratamientos = new Promise((resolve, reject) => {
-        Swal.fire({
-            title: '¿Estás seguro de guardar los tratamientos?',
-            text: "Se abrirá WhatsApp para confirmar la compra.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Guardar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                resolve();
-            } else {
-                reject(new Error('La operación fue cancelada'));
+    Swal.fire({
+        title: 'Formulario de datos del cliente',
+        html: `<p>Total: $${total}</p>
+            <input id="nombreCliente" type="text" placeholder="Nombre del cliente" required>
+            <input id="emailCliente" type="email" placeholder="Email del cliente" required>`,
+        showCancelButton: true,
+        confirmButtonText: 'Enviar',
+        cancelButtonText: 'Cancelar',
+        preConfirm: () => {
+            const nombreCliente = document.getElementById('nombreCliente').value;
+            const emailCliente = document.getElementById('emailCliente').value;
+
+            if (!nombreCliente || !emailCliente) {
+                Swal.showValidationMessage('Por favor, completa todos los campos');
+                return;
             }
-        });
-    });
 
-    guardarTratamientos.then(() => {
-        const telefono = '2954290990';
-        const totalCarrito = total;
-        const mensaje = `¡Hola! Quiero realizar una compra de tratamientos por un total de $${totalCarrito}.`;
-        const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
-        window.location.href = url;
-    }).catch((error) => {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message
-        });
+            const cliente = {
+                nombre: nombreCliente,
+                email: emailCliente
+            };
+
+            const formData = {
+                cliente: cliente,
+                tratamientos: carrito,
+                total: total
+            };
+
+            return formData;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const formData = result.value;
+            enviarFormulario(formData);
+        }
     });
 }
 
+function enviarFormulario(formData) {
+    setTimeout(() => {
+        Swal.fire({
+            icon: 'success',
+            title: 'Compra realizada exitosamente',
+            text: 'El proceso de compra ha sido exitoso',
+            showConfirmButton: false,
+            timer: 2000
+        });
+        vaciarCarrito();
+    }, 2000);
+}
 
-document.getElementById('contactForm').addEventListener('submit', function (e) {
-    e.preventDefault();
 
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const message = document.getElementById('message').value;
 
-    const formData = {
-        title: name,
-        body: message,
-        userId: 1 
-    };
 
-    fetch('https://jsonplaceholder.typicode.com/posts', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error en la solicitud: ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Respuesta del servidor:', data);
-            Swal.fire({
-                icon: 'success',
-                title: 'Mensaje enviado correctamente',
-                showConfirmButton: false,
-                timer: 1500
-            });
-            document.getElementById('contactForm').reset(); 
-        })
-});
+
