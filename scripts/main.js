@@ -1,7 +1,17 @@
 const contenedor = document.getElementById("contenedor");
 
+async function obtenerDatos() {
+    try {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+        const data = await response.json();
+    } catch (error) {
+    }
+}
+
+
 function servicios() {
     contenedor.innerHTML = "Estos son los servicios";
+    obtenerDatos();
 };
 
 const buttonServicios = document.getElementById("servicios");
@@ -100,7 +110,6 @@ function mostrarResumen() {
 }
 
 
-
 function guardarCarrito() {
     mostrarResumen();
 
@@ -141,6 +150,7 @@ function guardarCarrito() {
         }
     });
 }
+
 
 function enviarFormulario(formData) {
     setTimeout(() => {
